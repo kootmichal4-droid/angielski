@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#6c5ce7"><link rel="icon" href="icon-192.png">
 <title>English Daily</title>
 <style>
 :root{--bg:#f4f5fb;--card:#fff;--tx:#1d2040;--mu:#6b7090;--ac:#6c5ce7;--ac2:#00b894;--bad:#e17055;--bd:#e3e5f2}
@@ -29,6 +29,19 @@ nav button{flex:1;background:none;color:var(--mu);border-radius:0;padding:12px 2
 nav span{display:block;font-size:20px}
 ul{list-style:none;padding:0;margin:0}li{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--bd);gap:8px}
 h2{margin:0 0 10px;font-size:18px}.mu{color:var(--mu);font-size:14px}.msg{text-align:center;font-weight:700;margin:8px 0;min-height:22px}
+@keyframes up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(.7);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+@keyframes flame{50%{transform:scale(1.25) rotate(-6deg)}}
+@keyframes flipin{from{transform:rotateY(90deg);opacity:0}to{transform:none;opacity:1}}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+.card{animation:up .45s both}.card:nth-child(2){animation-delay:.08s}.card:nth-child(3){animation-delay:.16s}.card:nth-child(4){animation-delay:.24s}
+.flash{animation:flipin .35s}.opt.ok{animation:pop .35s}.opt.no{animation:shake .4s}
+.fl{display:inline-block;animation:flame 1.2s infinite}
+button{transition:transform .12s}button:active{transform:scale(.94)}
+.conf{position:fixed;top:-20px;width:10px;height:14px;z-index:99;animation:fall 2.2s linear forwards;pointer-events:none}
+.badge{display:inline-block;margin:4px;padding:8px 12px;border-radius:20px;background:var(--bd);font-size:13px;opacity:.6}.badge.on{background:linear-gradient(135deg,#fdcb6e,#fab1a0);color:#2d2d2d;opacity:1;animation:pop .5s}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--ac);color:#fff;padding:12px 20px;border-radius:30px;z-index:100;animation:pop .4s;font-weight:700}
 </style>
 </head>
 <body>
@@ -37,10 +50,10 @@ h2{margin:0 0 10px;font-size:18px}.mu{color:var(--mu);font-size:14px}.msg{text-a
 <nav id="nav"></nav>
 <script>
 const WORDS={
-A1:"apple|jabłko,house|dom,water|woda,book|książka,friend|przyjaciel,school|szkoła,happy|szczęśliwy,big|duży,eat|jeść,red|czerwony,mother|mama,dog|pies,cat|kot,morning|poranek,bread|chleb,city|miasto,car|samochód,sleep|spać,milk|mleko",
-A2:"airport|lotnisko,borrow|pożyczyć (od),believe|wierzyć,cheap|tani,dangerous|niebezpieczny,empty|pusty,forget|zapomnieć,holiday|wakacje,invite|zaprosić,lazy|leniwy,neighbour|sąsiad,prefer|woleć,receipt|paragon,ticket|bilet,weather|pogoda,wallet|portfel,tired|zmęczony,improve|poprawić,carry|nosić,journey|podróż",
-B1:"achieve|osiągnąć,advice|rada,afford|pozwolić sobie,benefit|korzyść,complain|narzekać,deadline|termin,experience|doświadczenie,get used to|przyzwyczaić się,improve|ulepszyć,knowledge|wiedza,manage|dawać radę,opportunity|okazja,reliable|niezawodny,suggest|zasugerować,threat|zagrożenie,whether|czy,reduce|zmniejszyć,support|wspierać,aware|świadomy,fulfil|spełnić",
-B2:"accomplish|dokonać,ambiguous|niejednoznaczny,reluctant|niechętny,thorough|dokładny,undermine|podważać,drawback|wada,fluctuate|wahać się,inevitable|nieunikniony,overwhelm|przytłoczyć,rely on|polegać na,substantial|znaczny,tackle|zmierzyć się z,viable|wykonalny,widespread|powszechny,coincidence|zbieg okoliczności,compelling|przekonujący,deteriorate|pogarszać się,enhance|wzmocnić,mitigate|złagodzić,scrutiny|dokładna analiza"
+A1:"table|stół,window|okno,family|rodzina,tea|herbata,night|noc,hello|cześć,apple|jabłko,house|dom,water|woda,book|książka,friend|przyjaciel,school|szkoła,happy|szczęśliwy,big|duży,eat|jeść,red|czerwony,mother|mama,dog|pies,cat|kot,morning|poranek,bread|chleb,city|miasto,car|samochód,sleep|spać,milk|mleko",
+A2:"angry|zły,beautiful|piękny,customer|klient,dinner|kolacja,early|wcześnie,island|wyspa,airport|lotnisko,borrow|pożyczyć (od),believe|wierzyć,cheap|tani,dangerous|niebezpieczny,empty|pusty,forget|zapomnieć,holiday|wakacje,invite|zaprosić,lazy|leniwy,neighbour|sąsiad,prefer|woleć,receipt|paragon,ticket|bilet,weather|pogoda,wallet|portfel,tired|zmęczony,improve|poprawić,carry|nosić,journey|podróż",
+B1:"behaviour|zachowanie,confident|pewny siebie,damage|szkoda,environment|środowisko,fear|strach,income|dochód,achieve|osiągnąć,advice|rada,afford|pozwolić sobie,benefit|korzyść,complain|narzekać,deadline|termin,experience|doświadczenie,get used to|przyzwyczaić się,improve|ulepszyć,knowledge|wiedza,manage|dawać radę,opportunity|okazja,reliable|niezawodny,suggest|zasugerować,threat|zagrożenie,whether|czy,reduce|zmniejszyć,support|wspierać,aware|świadomy,fulfil|spełnić",
+B2:"accumulate|gromadzić,adequate|wystarczający,anticipate|przewidywać,consequence|konsekwencja,crucial|kluczowy,hinder|utrudniać,accomplish|dokonać,ambiguous|niejednoznaczny,reluctant|niechętny,thorough|dokładny,undermine|podważać,drawback|wada,fluctuate|wahać się,inevitable|nieunikniony,overwhelm|przytłoczyć,rely on|polegać na,substantial|znaczny,tackle|zmierzyć się z,viable|wykonalny,widespread|powszechny,coincidence|zbieg okoliczności,compelling|przekonujący,deteriorate|pogarszać się,enhance|wzmocnić,mitigate|złagodzić,scrutiny|dokładna analiza"
 };
 const DAYS=[0,1,2,4,8,16];
 let S={level:"A1",box:{},due:{},custom:[],xp:0,streak:0,last:"",day:"",n:0,goal:10,time:"18:00",notified:""};
@@ -52,11 +65,28 @@ const words=()=>{const l=[];(WORDS[S.level]||"").split(",").forEach(x=>{const[a,
 const all=()=>Object.values(WORDS).join(",").split(",").map(x=>{const[a,b]=x.split("|");return{en:a,pl:b}}).concat(S.custom);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const speak=t=>{try{const u=new SpeechSynthesisUtterance(t);u.lang="en-GB";speechSynthesis.speak(u)}catch(e){}};
-function gain(xp){S.xp+=xp;S.n++;const t=today();if(S.last!==t){const y=new Date(Date.now()-864e5).toISOString().slice(0,10);S.streak=S.last===y?S.streak+1:1;S.last=t}save()}
+function gain(xp){const was=S.n;S.xp+=xp;S.n++;const t=today();if(S.last!==t){const y=new Date(Date.now()-864e5).toISOString().slice(0,10);S.streak=S.last===y?S.streak+1:1;S.last=t}
+if(was<S.goal&&S.n>=S.goal){confetti();toast("🎉 Cel dzienny wykonany!")}
+const lv=Math.floor(S.xp/100);if(lv>(S.lvl||0)){S.lvl=lv;toast("⬆️ Poziom XP "+lv+"!");confetti()}save()}
 let tab="home",flip=false,cur=null,qmode="mc",answered=false,msg="";
 const tabs=[["home","🏠","Start"],["cards","🃏","Fiszki"],["quiz","🎯","Quiz"],["words","📚","Słówka"],["set","⚙️","Ustawienia"]];
+const BADGES=[["🌱 Start",k=>S.xp>=1],["🔥 3 dni serii",k=>S.streak>=3],["📘 7 dni serii",k=>S.streak>=7],["⚡ 100 XP",k=>S.xp>=100],["🏆 500 XP",k=>S.xp>=500],["🧠 20 opanowanych",k=>k>=20],["✍️ Własne słówko",k=>S.custom.length>0]];
+const SEN=[["I ___ to school every day.","go","goes|went|going"],["She ___ a book now.","is reading","reads|read|reading"],["We ___ pizza yesterday.","ate","eat|eaten|eating"],["He is ___ than me.","taller","tall|tallest|more tall"],["They have lived here ___ 2010.","since","for|from|during"],["If it rains, I ___ stay home.","will","would|am|did"],["I'm interested ___ music.","in","on|at|of"],["She asked me ___ I wanted tea.","if","that|what|than"],["I ___ my keys. Have you seen them?","have lost","lost|was losing|lose"],["The report ___ by the manager yesterday.","was written","wrote|is writing|has wrote"],["I wish I ___ more time.","had","have|will have|having"],["He suggested ___ a taxi.","taking","to take|take|took"]];
+function confetti(){for(let i=0;i<40;i++){const d=document.createElement("i");d.className="conf";d.style.left=Math.random()*100+"vw";d.style.background=`hsl(${Math.random()*360},80%,60%)`;d.style.animationDelay=Math.random()*.5+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),3000)}}
+function toast(t){const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2500)}
+function modes(){return [["mc","Wybór"],["type","Pisanie"],["listen","👂 Słuchaj"],["gap","Zdania"]].map(m=>`<button class="${qmode===m[0]?"":"alt"}" onclick="qmode='${m[0]}';cur=null;answered=false;msg='';render()">${m[1]}</button>`).join("")}
+function quiz(){if(qmode==="listen"||qmode==="gap")return extra();return quiz0().replace(/<div class="row" style="margin-bottom:12px">.*?<\/div>/,'<div class="row" style="margin-bottom:12px">'+modes()+'</div>')}
+function extra(){
+ const head='<div class="row" style="margin-bottom:12px">'+modes()+'</div>';
+ if(!cur){answered=false;msg="";
+  if(qmode==="listen"){const w=words();cur=w[Math.floor(Math.random()*w.length)];setTimeout(()=>speak(cur.en),300)}
+  else{const q=SEN[Math.floor(Math.random()*SEN.length)];cur={s:q[0],en:q[1],pl:q[1],opts:[q[1],...q[2].split("|")].map(x=>({en:x,pl:x})).sort(()=>Math.random()-.5)}}}
+ const nx=answered?`<button class="alt" onclick="cur=null;render()">Dalej →</button>`:"";
+ if(qmode==="listen")return head+`<div class="card"><h2>👂 Posłuchaj i wpisz po angielsku</h2><button onclick="speak(cur.en)">🔊 Odtwórz</button><br><br><input id="ans" autocomplete="off" autocapitalize="off" onkeydown="if(event.key==='Enter')check()"><div class="msg">${msg}</div><div class="row"><button onclick="check()">Sprawdź</button>${nx}</div></div>`;
+ return head+`<div class="card"><h2>${esc(cur.s)}</h2>${cur.opts.map((o,i)=>`<button class="opt" id="o${i}" onclick="pick(${i})">${esc(o.pl)}</button>`).join("")}<div class="msg">${msg}</div>${nx}</div>`;
+}
 function render(){
-  document.getElementById("hello").textContent=`Poziom ${S.level} · seria ${S.streak} 🔥 · ${S.xp} XP`;
+  document.getElementById("hello").innerHTML=`Poziom ${S.level} · seria ${S.streak} <span class="fl">🔥</span> · ${S.xp} XP`;
   document.getElementById("nav").innerHTML=tabs.map(t=>`<button class="${tab===t[0]?"on":""}" onclick="go('${t[0]}')"><span>${t[1]}</span>${t[2]}</button>`).join("");
   const a=document.getElementById("app");
   if(tab==="home")a.innerHTML=home();
@@ -72,7 +102,7 @@ function home(){
   <div class="card"><h2>Cel na dziś: ${S.n}/${S.goal}</h2><div class="bar"><i style="width:${p}%"></i></div>
   <p class="mu">${p>=100?"🎉 Cel wykonany! Super robota.":"Zrób fiszki albo quiz, żeby zaliczyć dzień."}</p>
   <div class="row"><button onclick="go('cards')">🃏 Fiszki</button><button class="good" onclick="go('quiz')">🎯 Quiz</button></div></div>
-  <div class="card row"><div class="stat"><b>${S.streak}</b><span>dni serii</span></div><div class="stat"><b>${S.xp}</b><span>XP</span></div><div class="stat"><b>${known}/${w.length}</b><span>opanowane</span></div></div>`;
+  <div class="card row"><div class="stat"><b>${S.streak}</b><span>dni serii</span></div><div class="stat"><b>${S.xp}</b><span>XP</span></div><div class="stat"><b>${known}/${w.length}</b><span>opanowane</span></div></div><div class="card"><h2>🏅 Odznaki</h2>${BADGES.map(b=>`<span class="badge ${b[1](known)?"on":""}">${b[0]}</span>`).join("")}</div>`;
 }
 function setLv(l){S.level=l;save();render()}
 function nextCard(){const now=Date.now(),w=words();const due=w.filter(x=>(S.due[x.en]||0)<=now);const pool=due.length?due:null;cur=pool?pool[Math.floor(Math.random()*pool.length)]:null;flip=false}
@@ -83,7 +113,7 @@ function cards(){
   ${flip?`<div class="row"><button class="bad" style="flex:1" onclick="rate(false)">Nie znam</button><button class="good" style="flex:1" onclick="rate(true)">Znam</button></div>`:""}`;
 }
 function rate(ok){const k=S.box[cur.en]||0;const nb=ok?Math.min(5,k+1):0;S.box[cur.en]=nb;S.due[cur.en]=Date.now()+(ok?DAYS[nb]*864e5||6e4*10:6e4*2);gain(ok?3:1);cur=null;render()}
-function quiz(){
+function quiz0(){
   if(!cur){const w=words();cur=w[Math.floor(Math.random()*w.length)];answered=false;msg="";
     const pool=all().filter(x=>x.pl!==cur.pl).sort(()=>Math.random()-.5).slice(0,3);cur.opts=[cur,...pool].sort(()=>Math.random()-.5)}
   const head=`<div class="row" style="margin-bottom:12px"><button class="${qmode==="mc"?"":"alt"}" onclick="qmode='mc';cur=null;render()">Wybór</button><button class="${qmode==="type"?"":"alt"}" onclick="qmode='type';cur=null;render()">Pisanie</button></div>`;
@@ -110,6 +140,7 @@ function ics(){const[h,m]=S.time.split(":");const d=new Date().toISOString().sli
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:"text/calendar"}));a.download="angielski.ics";a.click()}
 setInterval(()=>{if(!("Notification" in window)||Notification.permission!=="granted")return;const n=new Date(),hm=n.toTimeString().slice(0,5);
   if(hm>=S.time&&S.notified!==today()&&S.n<S.goal){S.notified=today();save();new Notification("English Daily 🇬🇧",{body:"Czas na dzisiejsze słówka! Seria: "+S.streak+" 🔥"})}},30000);
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 render();
 </script>
 </body>
