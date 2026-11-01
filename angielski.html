@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>English Daily</title>
+<style>
+:root{--bg:#f4f5fb;--card:#fff;--tx:#1d2040;--mu:#6b7090;--ac:#6c5ce7;--ac2:#00b894;--bad:#e17055;--bd:#e3e5f2}
+@media(prefers-color-scheme:dark){:root{--bg:#12142a;--card:#1c1f3d;--tx:#eef0ff;--mu:#9aa0c8;--bd:#2c3060}}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--tx);padding-bottom:80px}
+header{background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:#fff;padding:20px 16px 28px;padding-top:max(20px,env(safe-area-inset-top))}
+header h1{margin:0;font-size:22px}header p{margin:4px 0 0;opacity:.9;font-size:14px}
+main{max-width:640px;margin:-16px auto 0;padding:0 14px}
+.card{background:var(--card);border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 4px 18px rgba(60,50,120,.1)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.stat{flex:1;min-width:90px;text-align:center}.stat b{display:block;font-size:24px}.stat span{font-size:12px;color:var(--mu)}
+button{font:inherit;border:0;border-radius:12px;padding:12px 16px;background:var(--ac);color:#fff;font-weight:600;cursor:pointer}
+button.alt{background:var(--bd);color:var(--tx)}button.good{background:var(--ac2)}button.bad{background:var(--bad)}
+.lv button{flex:1}.lv button.on{outline:3px solid var(--ac2)}
+input,select{font:inherit;padding:11px;border-radius:12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);width:100%}
+.bar{height:10px;background:var(--bd);border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ac),var(--ac2));transition:width .4s}
+.flash{min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:32px;font-weight:700;cursor:pointer;gap:8px}
+.flash small{font-size:13px;color:var(--mu);font-weight:400}
+.opt{display:block;width:100%;margin:8px 0;background:var(--bg);color:var(--tx);border:2px solid var(--bd);text-align:left}
+.opt.ok{border-color:var(--ac2);background:rgba(0,184,148,.18)}.opt.no{border-color:var(--bad);background:rgba(225,112,85,.18)}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;background:none;color:var(--mu);border-radius:0;padding:12px 2px;font-size:12px}nav button.on{color:var(--ac)}
+nav span{display:block;font-size:20px}
+ul{list-style:none;padding:0;margin:0}li{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--bd);gap:8px}
+h2{margin:0 0 10px;font-size:18px}.mu{color:var(--mu);font-size:14px}.msg{text-align:center;font-weight:700;margin:8px 0;min-height:22px}
+</style>
+</head>
+<body>
+<header><h1>🇬🇧 English Daily</h1><p id="hello"></p></header>
+<main id="app"></main>
+<nav id="nav"></nav>
+<script>
+const WORDS={
+A1:"apple|jabłko,house|dom,water|woda,book|książka,friend|przyjaciel,school|szkoła,happy|szczęśliwy,big|duży,eat|jeść,red|czerwony,mother|mama,dog|pies,cat|kot,morning|poranek,bread|chleb,city|miasto,car|samochód,sleep|spać,milk|mleko",
+A2:"airport|lotnisko,borrow|pożyczyć (od),believe|wierzyć,cheap|tani,dangerous|niebezpieczny,empty|pusty,forget|zapomnieć,holiday|wakacje,invite|zaprosić,lazy|leniwy,neighbour|sąsiad,prefer|woleć,receipt|paragon,ticket|bilet,weather|pogoda,wallet|portfel,tired|zmęczony,improve|poprawić,carry|nosić,journey|podróż",
+B1:"achieve|osiągnąć,advice|rada,afford|pozwolić sobie,benefit|korzyść,complain|narzekać,deadline|termin,experience|doświadczenie,get used to|przyzwyczaić się,improve|ulepszyć,knowledge|wiedza,manage|dawać radę,opportunity|okazja,reliable|niezawodny,suggest|zasugerować,threat|zagrożenie,whether|czy,reduce|zmniejszyć,support|wspierać,aware|świadomy,fulfil|spełnić",
+B2:"accomplish|dokonać,ambiguous|niejednoznaczny,reluctant|niechętny,thorough|dokładny,undermine|podważać,drawback|wada,fluctuate|wahać się,inevitable|nieunikniony,overwhelm|przytłoczyć,rely on|polegać na,substantial|znaczny,tackle|zmierzyć się z,viable|wykonalny,widespread|powszechny,coincidence|zbieg okoliczności,compelling|przekonujący,deteriorate|pogarszać się,enhance|wzmocnić,mitigate|złagodzić,scrutiny|dokładna analiza"
+};
+const DAYS=[0,1,2,4,8,16];
+let S={level:"A1",box:{},due:{},custom:[],xp:0,streak:0,last:"",day:"",n:0,goal:10,time:"18:00",notified:""};
+try{Object.assign(S,JSON.parse(localStorage.getItem("ed")||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem("ed",JSON.stringify(S))}catch(e){}};
+const today=()=>new Date().toISOString().slice(0,10);
+if(S.day!==today()){S.day=today();S.n=0;save()}
+const words=()=>{const l=[];(WORDS[S.level]||"").split(",").forEach(x=>{const[a,b]=x.split("|");l.push({en:a,pl:b})});S.custom.forEach(c=>l.push(c));return l};
+const all=()=>Object.values(WORDS).join(",").split(",").map(x=>{const[a,b]=x.split("|");return{en:a,pl:b}}).concat(S.custom);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const speak=t=>{try{const u=new SpeechSynthesisUtterance(t);u.lang="en-GB";speechSynthesis.speak(u)}catch(e){}};
+function gain(xp){S.xp+=xp;S.n++;const t=today();if(S.last!==t){const y=new Date(Date.now()-864e5).toISOString().slice(0,10);S.streak=S.last===y?S.streak+1:1;S.last=t}save()}
+let tab="home",flip=false,cur=null,qmode="mc",answered=false,msg="";
+const tabs=[["home","🏠","Start"],["cards","🃏","Fiszki"],["quiz","🎯","Quiz"],["words","📚","Słówka"],["set","⚙️","Ustawienia"]];
+function render(){
+  document.getElementById("hello").textContent=`Poziom ${S.level} · seria ${S.streak} 🔥 · ${S.xp} XP`;
+  document.getElementById("nav").innerHTML=tabs.map(t=>`<button class="${tab===t[0]?"on":""}" onclick="go('${t[0]}')"><span>${t[1]}</span>${t[2]}</button>`).join("");
+  const a=document.getElementById("app");
+  if(tab==="home")a.innerHTML=home();
+  else if(tab==="cards")a.innerHTML=cards();
+  else if(tab==="quiz")a.innerHTML=quiz();
+  else if(tab==="words")a.innerHTML=wordsView();
+  else a.innerHTML=settings();
+}
+function go(t){tab=t;flip=false;cur=null;answered=false;msg="";render();scrollTo(0,0)}
+function home(){
+  const p=Math.min(100,Math.round(S.n/S.goal*100)),w=words(),known=w.filter(x=>(S.box[x.en]||0)>=3).length;
+  return `<div class="card"><h2>Poziom</h2><div class="row lv">${["A1","A2","B1","B2"].map(l=>`<button class="${S.level===l?"on":"alt"}" onclick="setLv('${l}')">${l}</button>`).join("")}</div></div>
+  <div class="card"><h2>Cel na dziś: ${S.n}/${S.goal}</h2><div class="bar"><i style="width:${p}%"></i></div>
+  <p class="mu">${p>=100?"🎉 Cel wykonany! Super robota.":"Zrób fiszki albo quiz, żeby zaliczyć dzień."}</p>
+  <div class="row"><button onclick="go('cards')">🃏 Fiszki</button><button class="good" onclick="go('quiz')">🎯 Quiz</button></div></div>
+  <div class="card row"><div class="stat"><b>${S.streak}</b><span>dni serii</span></div><div class="stat"><b>${S.xp}</b><span>XP</span></div><div class="stat"><b>${known}/${w.length}</b><span>opanowane</span></div></div>`;
+}
+function setLv(l){S.level=l;save();render()}
+function nextCard(){const now=Date.now(),w=words();const due=w.filter(x=>(S.due[x.en]||0)<=now);const pool=due.length?due:null;cur=pool?pool[Math.floor(Math.random()*pool.length)]:null;flip=false}
+function cards(){
+  if(!cur)nextCard();
+  if(!cur)return `<div class="card"><h2>🎉 Na dziś koniec!</h2><p class="mu">Wszystkie fiszki z poziomu ${S.level} zaliczone. Wróć jutro albo dodaj nowe słówka.</p></div>`;
+  return `<div class="card flash" onclick="flip=!flip;if(flip)speak(cur.en);render()">${flip?esc(cur.pl)+`<small>${esc(cur.en)} 🔊</small>`:esc(cur.en)+`<small>dotknij, aby odwrócić</small>`}</div>
+  ${flip?`<div class="row"><button class="bad" style="flex:1" onclick="rate(false)">Nie znam</button><button class="good" style="flex:1" onclick="rate(true)">Znam</button></div>`:""}`;
+}
+function rate(ok){const k=S.box[cur.en]||0;const nb=ok?Math.min(5,k+1):0;S.box[cur.en]=nb;S.due[cur.en]=Date.now()+(ok?DAYS[nb]*864e5||6e4*10:6e4*2);gain(ok?3:1);cur=null;render()}
+function quiz(){
+  if(!cur){const w=words();cur=w[Math.floor(Math.random()*w.length)];answered=false;msg="";
+    const pool=all().filter(x=>x.pl!==cur.pl).sort(()=>Math.random()-.5).slice(0,3);cur.opts=[cur,...pool].sort(()=>Math.random()-.5)}
+  const head=`<div class="row" style="margin-bottom:12px"><button class="${qmode==="mc"?"":"alt"}" onclick="qmode='mc';cur=null;render()">Wybór</button><button class="${qmode==="type"?"":"alt"}" onclick="qmode='type';cur=null;render()">Pisanie</button></div>`;
+  if(qmode==="mc")return head+`<div class="card"><h2>Co znaczy: <b>${esc(cur.en)}</b>? <span onclick="speak(cur.en)">🔊</span></h2>${cur.opts.map((o,i)=>`<button class="opt" id="o${i}" onclick="pick(${i})">${esc(o.pl)}</button>`).join("")}<div class="msg">${msg}</div>${answered?`<button onclick="cur=null;render()">Dalej →</button>`:""}</div>`;
+  return head+`<div class="card"><h2>Napisz po angielsku: <b>${esc(cur.pl)}</b></h2><input id="ans" autocomplete="off" autocapitalize="off" onkeydown="if(event.key==='Enter')check()"><div class="msg">${msg}</div><div class="row"><button onclick="check()">Sprawdź</button>${answered?`<button class="alt" onclick="cur=null;render()">Dalej →</button>`:""}</div></div>`;
+}
+function pick(i){if(answered)return;answered=true;const ok=cur.opts[i].en===cur.en;gain(ok?5:1);msg=ok?"✅ Dobrze! +5 XP":"❌ To: "+cur.pl;render();document.getElementById("o"+i).classList.add(ok?"ok":"no");if(!ok){const c=cur.opts.findIndex(o=>o.en===cur.en);document.getElementById("o"+c).classList.add("ok")}}
+function check(){if(answered)return;const v=document.getElementById("ans").value.trim().toLowerCase();answered=true;const ok=v===cur.en.toLowerCase();gain(ok?8:1);msg=ok?"✅ Świetnie! +8 XP":"❌ Poprawnie: "+cur.en;render()}
+function wordsView(){
+  return `<div class="card"><h2>Dodaj własne słówko</h2><div class="row"><input id="ne" placeholder="English"><input id="np" placeholder="Polski"></div><br><button onclick="addW()">➕ Dodaj</button></div>
+  <div class="card"><h2>Lista (${S.level})</h2><ul>${words().map(w=>`<li><span>${esc(w.en)} <a onclick="speak('${esc(w.en).replace(/'/g,"")}')">🔊</a></span><span class="mu">${esc(w.pl)}</span></li>`).join("")}</ul></div>`;
+}
+function addW(){const e=document.getElementById("ne").value.trim(),p=document.getElementById("np").value.trim();if(!e||!p)return;S.custom.push({en:e,pl:p});save();render()}
+function settings(){
+  return `<div class="card"><h2>🔔 Codzienne przypomnienie</h2><p class="mu">Godzina:</p><input type="time" id="tm" value="${S.time}" onchange="S.time=this.value;save()"><br><br>
+  <div class="row"><button onclick="askN()">Włącz powiadomienia</button><button class="alt" onclick="ics()">📅 Dodaj do kalendarza</button></div>
+  <p class="mu">Powiadomienia z przeglądarki działają, gdy aplikacja jest otwarta. Przypomnienie w kalendarzu telefonu działa zawsze, więc polecam oba.</p></div>
+  <div class="card"><h2>🎯 Dzienny cel</h2><select onchange="S.goal=+this.value;save()">${[5,10,20,30,50].map(n=>`<option ${S.goal===n?"selected":""}>${n}</option>`).join("")}</select></div>
+  <div class="card"><button class="bad" onclick="if(confirm('Usunąć cały postęp?')){S={level:'A1',box:{},due:{},custom:[],xp:0,streak:0,last:'',day:today(),n:0,goal:10,time:'18:00',notified:''};save();render()}">Resetuj postęp</button></div>`;
+}
+function askN(){if(!("Notification" in window))return alert("Ta przeglądarka nie wspiera powiadomień.");Notification.requestPermission().then(p=>alert(p==="granted"?"Powiadomienia włączone ✅":"Brak zgody."))}
+function ics(){const[h,m]=S.time.split(":");const d=new Date().toISOString().slice(0,10).replace(/-/g,"");
+  const t=`BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//EnglishDaily//PL\r\nBEGIN:VEVENT\r\nUID:ed-daily@englishdaily\r\nDTSTAMP:${d}T000000Z\r\nDTSTART:${d}T${h}${m}00\r\nRRULE:FREQ=DAILY\r\nSUMMARY:Czas na angielski! 🇬🇧\r\nDESCRIPTION:Zrób dzisiejsze fiszki i quiz.\r\nBEGIN:VALARM\r\nTRIGGER:PT0M\r\nACTION:DISPLAY\r\nDESCRIPTION:Angielski\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR`;
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:"text/calendar"}));a.download="angielski.ics";a.click()}
+setInterval(()=>{if(!("Notification" in window)||Notification.permission!=="granted")return;const n=new Date(),hm=n.toTimeString().slice(0,5);
+  if(hm>=S.time&&S.notified!==today()&&S.n<S.goal){S.notified=today();save();new Notification("English Daily 🇬🇧",{body:"Czas na dzisiejsze słówka! Seria: "+S.streak+" 🔥"})}},30000);
+render();
+</script>
+</body>
+</html>
